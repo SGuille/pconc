@@ -16,4 +16,14 @@ public class Worker extends Thread {
 			
 		}
 	}
+
+	public void setBegin(int n) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void setEnd(int capacidad) {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -50,4 +50,9 @@ public class Buffer {
 	private int next(int i) {
 		return (i+1)%(this.data.length);
 	}
+
+	public int getCapacidad() {
+		
+		return this.getData().length;
+	}
 }
