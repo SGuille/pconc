@@ -3,31 +3,16 @@ public class ConcurVector {
 
 	// El array con los elementos del vector
 	private double[] elements;
-	private int load;
 	private int thread;
 	
 	
 	/** Constructor del SeqVector.
 	 * @param size, la longitud del vector.
 	 * @precondition size > 0. */
-	public ConcurVector(int dimension, int thread, int load) {
+	public ConcurVector(int dimension, int thread) {
 		elements = new double[dimension];
-		this.load = load;
 		this.thread = thread;
 	}
-	
-	
-	public int getLoad() {
-		return load;
-	}
-
-
-
-	public void setLoad(int load) {
-		this.load = load;
-	}
-
-
 
 	public int getThread() {
 		return thread;
@@ -71,7 +56,7 @@ public class ConcurVector {
 
 	/** Pone el valor d en todas las posiciones del vector. 
 	 * @param d, el valor a ser asignado. */
-	public void set(double d) {
+	public synchronized void set(double d) {
 		for (int i = 0; i < dimension(); ++i)
 			elements[i] = d;
 	}
@@ -80,7 +65,7 @@ public class ConcurVector {
 	/** Copia los valores de otro vector sobre este vector.
 	 * @param v, el vector del que se tomaran los valores nuevos.
 	 * @precondition dimension() == v.dimension(). */
-	public void assign(SeqVector v) {
+	public synchronized void assign(ConcurVector v) {
 		for (int i = 0; i < dimension(); ++i)
 			set(i, v.get(i));
 	}
@@ -91,7 +76,7 @@ public class ConcurVector {
 	 * @param mask, vector que determina si una posicion se debe copiar.
 	 * @param v, el vector del que se tomaran los valores nuevos.
 	 * @precondition dimension() == mask.dimension() && dimension() == v.dimension(). */
-	public void assign(SeqVector mask, SeqVector v) {
+	public synchronized void assign(ConcurVector mask, ConcurVector v) {
 		for (int i = 0; i < dimension(); ++i)
 			if (mask.get(i) >= 0)
 				set(i, v.get(i));
@@ -101,7 +86,7 @@ public class ConcurVector {
     /** Suma los valores de este vector con los de otro (uno a uno).
 	 * @param v, el vector con los valores a sumar.
 	 * @precondition dimension() == v.dimension(). */
-	public void add(SeqVector v) {
+	public synchronized void add(ConcurVector v) {
 		for (int i = 0; i < dimension(); ++i)
 			set(i, get(i) + v.get(i));
 	}
@@ -111,21 +96,21 @@ public class ConcurVector {
      *  (uno a uno).
 	 * @param v, el vector con los valores a multiplicar.
 	 * @precondition dimension() == v.dimension(). */
-	public void mul(SeqVector v) {
+	public synchronized void mul(ConcurVector v) {
 		for (int i = 0; i < dimension(); ++i)
 			set(i, get(i) * v.get(i));
 	}
 	
 	
 	/** Obtiene el valor absoluto de cada elemento del vector. */
-	public void abs() {
+	public synchronized void abs() {
 		for (int i = 0; i < dimension(); ++i)
 			set(i, Math.abs(get(i)));
 	}
 
 
 	/** Obtiene la suma de todos los valores del vector. */
-	public double sum() {
+	public synchronized double sum() {
 		double result = 0;
 		for (int i = 0; i < dimension(); ++i)
 			result += get(i);
@@ -134,7 +119,7 @@ public class ConcurVector {
     
     
     /** Obtiene el valor promedio en el vector. */
-	public double mean() {
+	public synchronized double mean() {
         	double total = sum();
         	return total / dimension();
 	}
@@ -145,8 +130,8 @@ public class ConcurVector {
      * de cada coordenada.
 	 * @param v, el vector a usar para realizar el producto.
 	 * @precondition dimension() == v.dimension(). */
-	public double prod(SeqVector v) {
-		SeqVector aux = new SeqVector(dimension());
+	public synchronized double prod(ConcurVector v) {
+		ConcurVector aux = new ConcurVector(dimension(),1);
 		aux.assign(this);
 		aux.mul(v);
 		return aux.sum();
@@ -157,8 +142,8 @@ public class ConcurVector {
      *  Recordar que la norma se calcula haciendo la raiz cuadrada de la
      *  suma de los cuadrados de sus coordenadas.
      */
-	public double norm() {
-		SeqVector aux = new SeqVector(dimension());
+	public synchronized double norm() {
+		ConcurVector aux = new ConcurVector(dimension(),1);
 		aux.assign(this);
 		aux.mul(this);
 		return Math.sqrt(aux.sum());
@@ -166,7 +151,7 @@ public class ConcurVector {
 	
 	
     /** Obtiene el valor maximo en el vector. */
-	public double max() {
+	public synchronized double max() {
         double current_max = get(0);
 		for (int i = 0; i < dimension(); ++i)
             current_max = Math.max(current_max, get(i));

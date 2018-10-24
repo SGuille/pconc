@@ -7,27 +7,32 @@ public class ThreadPool {
 	
 	public ThreadPool(Integer cantWorkers, Integer lenghtBuffer){
 		this.workers = new ArrayList<Worker>(); 
-		this.initilize(cantWorkers,lenghtBuffer);
+		this.initialize(cantWorkers,lenghtBuffer);
 	}
 
-	public void initilize(Integer cantWorkers, Integer buffer){
-		this.initializeBuffer(buffer);
-		for(int i=0;i == cantWorkers;i++){
-			this.workers.add(initializeWorker(this.buffer));
+	public void initialize	(Integer cantWorkers, Integer buffer){
+		this.buffer = new Buffer(buffer);
+		for(int i=0;i < cantWorkers;i++){
+			this.setWorker(new Worker(this.buffer));
 		}
 	}
 
-	public Worker initializeWorker(Buffer buffer) {
-		return new Worker(buffer);
+	public void setWorker(Worker k){
+		
+		this.workers.add(k);
 	}
-
-	public void initializeBuffer(Integer buffer) {
-		this.buffer = new Buffer(buffer);
+	
+	public ArrayList<Worker> getWorkers(){
+		return this.workers;
+	}
+	
+	public Buffer getBuffer(){
+		return this.buffer;
 	}
 
 	//Divide el tamaño del buffer segun la cantidad de workers
 	public Integer getPartesIguales(){
-		return this.buffer.getCapacidad() % this.workers.size();
+		return this.buffer.getCapacidad() / this.workers.size();
 	}
 	
 	public void asignarTrabajo(){
