@@ -1,14 +1,16 @@
 package workers;
 
+import java.util.ArrayList;
+
 public abstract class Worker extends Thread {
 
 	private Buffer buffer;
-	private ThreadPool tpool;
+	private ArrayList<Double> elementos;
 	
-	public Worker(Buffer buffer, ThreadPool tpool) {
+	public Worker(Buffer buffer, ArrayList<Double> elementos) {
 
 		this.buffer = buffer;
-		this.tpool = tpool;
+		this.elementos = elementos;
 	}
 
 	public Buffer getBuffer() {
