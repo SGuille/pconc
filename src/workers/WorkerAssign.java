@@ -1,19 +1,19 @@
 package workers;
 
-public class WorkerMul extends Worker{
+
+public class WorkerAssign extends Worker{
 
     private ConcurVector v2;
 
-    public WorkerMul(ConcurVector v, int cant, ConcurVector v2) {
+	public WorkerAssign(ConcurVector v, int cant, ConcurVector v2) {
         super(v,cant);
         this.v2 = v2;
     }
 
-    @Override
     public void work(){
         for(int cant = 0; cant < this.cantAnalizar; cant++){
             int posicionAnalizar = this.vector.getPosicionAnalizar();
-            this.vector.set(posicionAnalizar, this.vector.get(posicionAnalizar) * v2.get(posicionAnalizar));
+            this.vector.set(posicionAnalizar, this.v2.get(posicionAnalizar));
         }
     }
 }

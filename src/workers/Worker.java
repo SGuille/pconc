@@ -1,39 +1,21 @@
 package workers;
 
-import java.util.ArrayList;
-
 public abstract class Worker extends Thread {
 
-	private Buffer buffer;
-	private ArrayList<Double> elementos;
-	
-	public Worker(Buffer buffer, ArrayList<Double> elementos) {
+	public ConcurVector vector;
+	public int cantAnalizar;
 
-		this.buffer = buffer;
-		this.elementos = elementos;
-	}
-
-	public Buffer getBuffer() {
-		return buffer;
+	public Worker(ConcurVector v, int cant) {
+		this.vector = v;
+		this.cantAnalizar = cant;
 	}
 
 	@Override
 	public void run() {
-		while (true){
-			this.work();
-		}
+		this.work();
 	}
 
-	public abstract void work();
-
-	public void setBegin(int n) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void setEnd(int capacidad) {
-		// TODO Auto-generated method stub
-		
+		public abstract void work();
 	}
 
 }

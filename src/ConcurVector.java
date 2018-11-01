@@ -1,94 +1,98 @@
 
+import workers.WorkerAbs;
+import workers.WorkerAdd;
+import workers.WorkerAssign;
+import workers.WorkerAssignMask;
+import workers.WorkerMax;
+import workers.WorkerMin;
+import workers.WorkerMul;
+import workers.WorkerSum;
+
+
 public class ConcurVector {
 
 	// El array con los elementos del vector
+	private int dimension;
+	private int maxThreads;
+	private int posicionAnalizar;
 	private double[] elements;
-	private int thread;
-	
-	
-	/** Constructor del SeqVector.
-	 * @param size, la longitud del vector.
-	 * @precondition size > 0. */
-	public ConcurVector(int dimension, int thread) {
-		elements = new double[dimension];
-		this.thread = thread;
+
+
+
+	/** Constructor */
+	public ConcurVector(int dimension, int maxThreads) {
+		this.dimension = dimension;
+		this.maxThreads = maxThreads;
 	}
 
 	public int getThread() {
-		return thread;
+		return maxThreads;
 	}
 
 
 
 	public void setThread(int thread) {
-		this.thread = thread;
+		this.maxThreads = thread;
 	}
 
 
-
-	/** Retorna la longitud del vector; es decir, su dimension. */
 	public int dimension() {
 		return elements.length;
 	}
 	
-	
-	/** Retorna el elemento del vector en la posicion i.
-	 * @param i, la posicion del elemento a ser retornado.
-	 * @precondition 0 <= i < dimension(). */
+
 	public double get(int i) {
 		return elements[i];
 	}
 	
-	
-	/** Pone el valor d en la posicion i del vector. 
-	 * @param i, la posicion a setear.
-	 * @param d, el valor a ser asignado en la posicion i.
-	 * @precondition 0 <= i < dimension. */
+
 	public void set(int i, double d) {
 		elements[i] = d;
 	}
-	
-    
-    /**De aquí en adelante, los métodos deben ser resueltos 
+
+	public int cantElemsAnalizar(int i){
+		int cantElemsAnalizar = this.dimension() / this.maxThreads;
+		if(i<this.dimension() % this.maxThreads){
+			cantElemsAnalizar = (this.dimension() / this.maxThreads) + 1;
+		}
+
+		return cantElemsAnalizar;
+	}
+	public synchronized int getPosicionAnalizar() {
+		int posicion = this.posicionAnalizar;
+		this.posicionAnalizar++;
+		return posicion;
+	}
+
+	/**De aquí en adelante, los métodos deben ser resueltos
      * de manera concurrente
      */
 
-
-	/** Pone el valor d en todas las posiciones del vector. 
-	 * @param d, el valor a ser asignado. */
 	public synchronized void set(double d) {
 		for (int i = 0; i < dimension(); ++i)
 			elements[i] = d;
 	}
-	
-	
-	/** Copia los valores de otro vector sobre este vector.
-	 * @param v, el vector del que se tomaran los valores nuevos.
-	 * @precondition dimension() == v.dimension(). */
+
+
 	public synchronized void assign(ConcurVector v) {
-		for (int i = 0; i < dimension(); ++i)
-			set(i, v.get(i));
+		for(int i = 0; i < this.maxThreads; i++)
+			new WorkerAssign(this, this.cantElemsAnalizar(i), v).start();
 	}
-	
-	
-	/** Copia algunos valores de otro vector sobre este vector.
-	 * Un vector mascara indica cuales valores deben copiarse.
-	 * @param mask, vector que determina si una posicion se debe copiar.
-	 * @param v, el vector del que se tomaran los valores nuevos.
-	 * @precondition dimension() == mask.dimension() && dimension() == v.dimension(). */
+
+
 	public synchronized void assign(ConcurVector mask, ConcurVector v) {
-		for (int i = 0; i < dimension(); ++i)
-			if (mask.get(i) >= 0)
-				set(i, v.get(i));
+		for(int i = 0; i < this.maxThreads; i++)
+			new WorkerAssignMask(this, this.cantElemsAnalizar(i), v, mask).start();
 	}
+
 	
 	
     /** Suma los valores de este vector con los de otro (uno a uno).
 	 * @param v, el vector con los valores a sumar.
 	 * @precondition dimension() == v.dimension(). */
 	public synchronized void add(ConcurVector v) {
-		for (int i = 0; i < dimension(); ++i)
-			set(i, get(i) + v.get(i));
+		for(int i = 0; i < this.maxThreads; i++)
+			new WorkerAdd(this, this.cantElemsAnalizar(i), v).start();
 	}
 	
 	
@@ -97,24 +101,21 @@ public class ConcurVector {
 	 * @param v, el vector con los valores a multiplicar.
 	 * @precondition dimension() == v.dimension(). */
 	public synchronized void mul(ConcurVector v) {
-		for (int i = 0; i < dimension(); ++i)
-			set(i, get(i) * v.get(i));
+		for(int i = 0; i < this.maxThreads; i++)
+			new WorkerMul(this, this.cantElemsAnalizar(i), v).start();
 	}
 	
 	
 	/** Obtiene el valor absoluto de cada elemento del vector. */
 	public synchronized void abs() {
-		for (int i = 0; i < dimension(); ++i)
-			set(i, Math.abs(get(i)));
+		for(int i = 0; i < this.maxThreads; i++)
+			new WorkerAbs(this, this.cantElemsAnalizar(i)).start();
 	}
 
 
 	/** Obtiene la suma de todos los valores del vector. */
 	public synchronized double sum() {
-		double result = 0;
-		for (int i = 0; i < dimension(); ++i)
-			result += get(i);
-		return result;
+		/////////////
 	}
     
     
@@ -152,9 +153,8 @@ public class ConcurVector {
 	
     /** Obtiene el valor maximo en el vector. */
 	public synchronized double max() {
-        double current_max = get(0);
-		for (int i = 0; i < dimension(); ++i)
-            current_max = Math.max(current_max, get(i));
-        return current_max;
+		for(int i = 0; i < this.maxThreads; i++)
+			new WorkerMax(this, this.cantDeElementosAAnalizar(i), b, v).start();
 	}	
 }
+
